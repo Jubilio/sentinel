@@ -19,6 +19,14 @@ export interface ProcessingStep {
   progress: number;
 }
 
+export interface SafetyAnalysis {
+  nudityScore: number;     // 0-100: Amount of nudity/intimate content
+  riskScore: number;       // 0-100: Overall NCII violation risk
+  confidence: number;      // 0-100: Certainty of analysis
+  reasoning: string;       // Human-readable explanation
+  method: 'gemini' | 'nsfwjs'; // Detection method used
+}
+
 export interface DigitalFingerprint {
   hashType: 'pHash' | 'dHash' | 'FaceNet';
   hashValue: string;
@@ -60,6 +68,9 @@ export interface UrlAnalysisResult {
     vaultAssetId?: string;
     videoHashMatch: boolean;
     faceMatch: boolean;
+    nudityScore?: number;
+    reasoning?: string;
+    detectionMethod?: 'gemini' | 'nsfwjs';
   };
 }
 
