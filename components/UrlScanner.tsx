@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Icons } from '../constants';
-import { UrlAnalysisResult } from '../types';
+import { UrlAnalysisResult, ProcessingStep } from '../types';
 import { generatePortugueseTakedown } from '../services/geminiService';
 
 const UrlScanner: React.FC = () => {
@@ -9,32 +9,87 @@ const UrlScanner: React.FC = () => {
   const [isVictim, setIsVictim] = useState(false);
   const [analysis, setAnalysis] = useState<UrlAnalysisResult | null>(null);
   const [legalText, setLegalText] = useState('');
-  const [loadingText, setLoadingText] = useState('');
+  const [error, setError] = useState('');
+  
+  // Granular progress steps for detailed user feedback
+  const [steps, setSteps] = useState<ProcessingStep[]>([
+    { id: '1', label: 'Establishing secure connection', status: 'pending', progress: 0 },
+    { id: '2', label: 'Fetching page metadata', status: 'pending', progress: 0 },
+    { id: '3', label: 'Extracting keyframes & generating hashes', status: 'pending', progress: 0 },
+    { id: '4', label: 'Matching against Secure Vault', status: 'pending', progress: 0 },
+    { id: '5', label: 'Calculating risk & virality score', status: 'pending', progress: 0 },
+  ]);
+
+  const updateStep = (index: number, status: ProcessingStep['status'], progress: number) => {
+    setSteps(prev => {
+      const newSteps = [...prev];
+      newSteps[index] = { ...newSteps[index], status, progress };
+      return newSteps;
+    });
+  };
+
+  const resetSteps = () => {
+    setSteps([
+      { id: '1', label: 'Establishing secure connection', status: 'pending', progress: 0 },
+      { id: '2', label: 'Fetching page metadata', status: 'pending', progress: 0 },
+      { id: '3', label: 'Extracting keyframes & generating hashes', status: 'pending', progress: 0 },
+      { id: '4', label: 'Matching against Secure Vault', status: 'pending', progress: 0 },
+      { id: '5', label: 'Calculating risk & virality score', status: 'pending', progress: 0 },
+    ]);
+  };
 
   const handleAnalyze = async () => {
     if (!url) return;
-    setStatus('analyzing');
-    setLoadingText('Connecting to headless browser...');
-    
-    // Simulate network delays and processing
-    await new Promise(r => setTimeout(r, 1000));
-    setLoadingText('Extracting metadata and keyframes...');
-    await new Promise(r => setTimeout(r, 1500));
-    setLoadingText('Comparing hashes with local Secure Vault...');
-    await new Promise(r => setTimeout(r, 1500));
 
-    // Mock Result
-    const platform = url.includes('facebook') ? 'Facebook' : url.includes('x.com') ? 'X (Twitter)' : 'Unknown Platform';
-    const isMatch = true; // Simulating a match for demo
+    // Robust regex for URL validation
+    const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+    
+    if (!urlRegex.test(url)) {
+      setError('Invalid URL format. Please enter a valid link (e.g., https://platform.com/video/123).');
+      return;
+    }
+
+    setError('');
+    setStatus('analyzing');
+    resetSteps();
+    
+    // Simulate Step 1: Connection
+    updateStep(0, 'processing', 20);
+    await new Promise(r => setTimeout(r, 600));
+    updateStep(0, 'completed', 100);
+
+    // Simulate Step 2: Metadata
+    updateStep(1, 'processing', 40);
+    await new Promise(r => setTimeout(r, 800));
+    updateStep(1, 'completed', 100);
+
+    // Simulate Step 3: Hashing
+    updateStep(2, 'processing', 60);
+    await new Promise(r => setTimeout(r, 1200));
+    updateStep(2, 'completed', 100);
+
+    // Simulate Step 4: Vault Comparison
+    updateStep(3, 'processing', 80);
+    await new Promise(r => setTimeout(r, 900));
+    updateStep(3, 'completed', 100);
+
+    // Simulate Step 5: Risk Analysis
+    updateStep(4, 'processing', 90);
+    await new Promise(r => setTimeout(r, 800));
+    updateStep(4, 'completed', 100);
+
+    // Mock Result Data
+    const platform = url.includes('facebook') ? 'Facebook' : url.includes('x.com') || url.includes('twitter') ? 'X (Twitter)' : 'Unknown Platform';
+    const isMatch = true;
 
     setAnalysis({
       url,
       platform,
       detectedAt: new Date().toISOString(),
-      thumbnailUrl: 'https://picsum.photos/400/225', // Mock
+      thumbnailUrl: 'https://picsum.photos/400/225', // Mock thumbnail
       metadata: {
-        title: 'Video shared without consent',
-        uploader: 'User_9928',
+        title: 'Detected Video Stream',
+        uploader: 'Anonymous_User_x99',
         views: '1,240'
       },
       matchResult: {
@@ -51,8 +106,12 @@ const UrlScanner: React.FC = () => {
 
   const handleGenerateLegal = async () => {
     if (!analysis) return;
-    setLoadingText('Generating signed evidence package and legal text...');
-    setStatus('analyzing'); // Reuse loading state
+    setStatus('analyzing'); // Use analyzing state to show processing during generation
+    
+    // Create a temporary single step for generation to show feedback
+    setSteps([
+      { id: 'gen', label: 'Generating signed evidence package & legal notice...', status: 'processing', progress: 100 }
+    ]);
     
     const text = await generatePortugueseTakedown(analysis, isVictim);
     setLegalText(text);
@@ -79,10 +138,13 @@ const UrlScanner: React.FC = () => {
             <input 
               type="text" 
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://facebook.com/..." 
-              className="w-full pl-10 bg-slate-900 border border-slate-700 rounded-lg py-3 text-slate-200 focus:outline-none focus:border-brand-500 transition-colors"
-              disabled={status !== 'idle' && status !== 'preview' && status !== 'matched'}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (error) setError('');
+              }}
+              placeholder="https://platform.com/video/..." 
+              className={`w-full pl-10 bg-slate-900 border rounded-lg py-3 text-slate-200 focus:outline-none transition-colors ${error ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-brand-500'}`}
+              disabled={status === 'analyzing'}
             />
           </div>
           <button 
@@ -94,6 +156,11 @@ const UrlScanner: React.FC = () => {
             <span>Analyze</span>
           </button>
         </div>
+        {error && (
+          <p className="mt-2 text-xs text-red-500 flex items-center animate-fade-in">
+             <span className="mr-1 font-bold">!</span> {error}
+          </p>
+        )}
 
         {/* Victim Declaration */}
         <div className="mt-4 flex items-center space-x-2">
@@ -110,11 +177,36 @@ const UrlScanner: React.FC = () => {
         </div>
       </div>
 
-      {/* Loading State */}
+      {/* Loading State with Granular Progress */}
       {status === 'analyzing' && (
-        <div className="py-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-500 mb-4"></div>
-            <p className="text-slate-400 text-sm animate-pulse">{loadingText}</p>
+        <div className="bg-slate-850 rounded-xl border border-slate-700 p-8 shadow-lg max-w-2xl mx-auto animate-fade-in my-8">
+           <h3 className="text-center text-white font-semibold mb-6 flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-t-2 border-r-2 border-brand-500 rounded-full animate-spin"></div>
+              <span>Security Analysis in Progress</span>
+           </h3>
+           <div className="space-y-4">
+              {steps.map((step) => (
+                <div key={step.id} className="relative">
+                  <div className="flex justify-between text-xs text-slate-400 mb-1">
+                    <span className={step.status === 'processing' ? 'text-brand-400 font-medium' : ''}>
+                        {step.label}
+                    </span>
+                    <span className={step.status === 'completed' ? 'text-green-500 font-medium' : ''}>
+                        {step.status === 'completed' ? 'Done' : step.status === 'pending' ? 'Pending' : `${step.progress}%`}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ease-out ${
+                          step.status === 'completed' ? 'bg-green-500' : 
+                          step.status === 'processing' ? 'bg-brand-500' : 'bg-slate-700'
+                      }`} 
+                      style={{ width: `${step.status === 'pending' ? 0 : step.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
         </div>
       )}
 
@@ -143,7 +235,7 @@ const UrlScanner: React.FC = () => {
                 </div>
                 <div className="pt-2 text-amber-500 flex items-center space-x-1">
                     <Icons.Alert />
-                    <span>Potential NCII Detected</span>
+                    <span>High Risk NCII Detected</span>
                 </div>
             </div>
           </div>
