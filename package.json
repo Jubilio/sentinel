@@ -1,7 +1,8 @@
 {
-  "name": "copy-of-sentinel---secure-content-protection",
-  "private": true,
-  "version": "0.0.0",
+  "name": "sentinel-secure-vault",
+  "version": "1.0.0",
+  "description": "Plataforma segura de proteção contra NCII com processamento client-side.",
+  "main": "index.tsx",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,16 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "recharts": "^3.5.1",
-    "react-dom": "^19.2.3",
-    "react": "^19.2.3",
     "@google/genai": "^1.33.0",
-    "react-router-dom": "^7.10.1"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^7.10.1",
+    "recharts": "^3.5.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   }
 }

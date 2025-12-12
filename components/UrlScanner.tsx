@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Icons } from '../constants';
 import { UrlAnalysisResult, ProcessingStep } from '../types';
-import { generatePortugueseTakedown } from '../services/geminiService';
+import { generatePortugueseTakedown, searchUrlContext } from '../services/geminiService';
 
 const UrlScanner: React.FC = () => {
   const [url, setUrl] = useState('');
@@ -10,6 +10,8 @@ const UrlScanner: React.FC = () => {
   const [analysis, setAnalysis] = useState<UrlAnalysisResult | null>(null);
   const [legalText, setLegalText] = useState('');
   const [error, setError] = useState('');
+  const [detailText, setDetailText] = useState(''); // New state for micro-updates
+  const [searchContext, setSearchContext] = useState<string>('');
   
   // Granular progress steps for detailed user feedback
   const [steps, setSteps] = useState<ProcessingStep[]>([
@@ -36,6 +38,8 @@ const UrlScanner: React.FC = () => {
       { id: '4', label: 'Matching against Secure Vault', status: 'pending', progress: 0 },
       { id: '5', label: 'Calculating risk & virality score', status: 'pending', progress: 0 },
     ]);
+    setDetailText('');
+    setSearchContext('');
   };
 
   const handleAnalyze = async () => {
@@ -54,29 +58,51 @@ const UrlScanner: React.FC = () => {
     resetSteps();
     
     // Simulate Step 1: Connection
+    setDetailText('Initializing headless browser session...');
     updateStep(0, 'processing', 20);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
+    setDetailText('Handshaking via TLS 1.3...');
+    updateStep(0, 'processing', 80);
+    await new Promise(r => setTimeout(r, 400));
     updateStep(0, 'completed', 100);
 
     // Simulate Step 2: Metadata
-    updateStep(1, 'processing', 40);
-    await new Promise(r => setTimeout(r, 800));
+    setDetailText('Parsing DOM structure...');
+    updateStep(1, 'processing', 30);
+    await new Promise(r => setTimeout(r, 600));
+    setDetailText('Extracting OpenGraph tags...');
     updateStep(1, 'completed', 100);
 
+    // Perform Google Search Grounding in parallel
+    const searchPromise = searchUrlContext(url).then(ctx => {
+        setSearchContext(ctx);
+    });
+
     // Simulate Step 3: Hashing
-    updateStep(2, 'processing', 60);
-    await new Promise(r => setTimeout(r, 1200));
+    setDetailText('Identifying video stream segments...');
+    updateStep(2, 'processing', 40);
+    await new Promise(r => setTimeout(r, 800));
+    setDetailText('Generating perceptual hash (pHash)...');
+    updateStep(2, 'processing', 90);
+    await new Promise(r => setTimeout(r, 600));
     updateStep(2, 'completed', 100);
 
     // Simulate Step 4: Vault Comparison
-    updateStep(3, 'processing', 80);
-    await new Promise(r => setTimeout(r, 900));
+    setDetailText('Accessing local encrypted vault...');
+    updateStep(3, 'processing', 50);
+    await new Promise(r => setTimeout(r, 500));
+    setDetailText('Calculating Hamming distance...');
+    updateStep(3, 'processing', 100);
+    await new Promise(r => setTimeout(r, 300));
     updateStep(3, 'completed', 100);
 
     // Simulate Step 5: Risk Analysis
-    updateStep(4, 'processing', 90);
-    await new Promise(r => setTimeout(r, 800));
+    setDetailText('Querying viral velocity metrics...');
+    updateStep(4, 'processing', 60);
+    await new Promise(r => setTimeout(r, 600));
+    await searchPromise; // Wait for search to complete
     updateStep(4, 'completed', 100);
+    setDetailText('Analysis complete.');
 
     // Mock Result Data
     const platform = url.includes('facebook') ? 'Facebook' : url.includes('x.com') || url.includes('twitter') ? 'X (Twitter)' : 'Unknown Platform';
@@ -107,6 +133,7 @@ const UrlScanner: React.FC = () => {
   const handleGenerateLegal = async () => {
     if (!analysis) return;
     setStatus('analyzing'); // Use analyzing state to show processing during generation
+    setDetailText('Drafting legal document...');
     
     // Create a temporary single step for generation to show feedback
     setSteps([
@@ -207,6 +234,11 @@ const UrlScanner: React.FC = () => {
                 </div>
               ))}
             </div>
+            {detailText && (
+                <div className="mt-6 text-center text-xs text-slate-500 font-mono animate-pulse">
+                    {'>'} {detailText}
+                </div>
+            )}
         </div>
       )}
 
@@ -237,6 +269,12 @@ const UrlScanner: React.FC = () => {
                     <Icons.Alert />
                     <span>High Risk NCII Detected</span>
                 </div>
+                {searchContext && (
+                    <div className="mt-4 p-3 bg-slate-900 rounded border border-slate-800 text-xs text-slate-400">
+                        <strong className="block text-brand-400 mb-1">Search Grounding Insights:</strong>
+                        {searchContext}
+                    </div>
+                )}
             </div>
           </div>
 

@@ -3,6 +3,56 @@ import { EvidencePackage, RemovalRequestDraft, UrlAnalysisResult } from "../type
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        const result = reader.result as string;
+        // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64 = result.split(',')[1];
+        resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export const analyzeImageContent = async (file: File): Promise<string> => {
+  try {
+    const base64Data = await fileToBase64(file);
+    const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: {
+            parts: [
+                { inlineData: { mimeType: file.type, data: base64Data } },
+                { text: "Analyze this image for content safety. Describe the visual elements and provide a risk assessment regarding sensitive or intimate content." }
+            ]
+        }
+    });
+    return response.text || "No analysis available.";
+  } catch (error) {
+    console.error("Gemini Image Analysis Error:", error);
+    return "Error analyzing image. Please try again.";
+  }
+};
+
+export const searchUrlContext = async (url: string): Promise<string> => {
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Investigate this URL: ${url}. Is it a known platform? Are there recent reports of security issues, leaks, or policy violations associated with this domain? Provide a concise summary based on search results.`,
+            config: {
+                tools: [{ googleSearch: {} }]
+            }
+        });
+        
+        return response.text || "No search context available.";
+    } catch (error) {
+        console.error("Gemini Search Error:", error);
+        return "Unable to verify URL context via Search.";
+    }
+};
+
 export const generateLegalTakedown = async (evidence: EvidencePackage): Promise<RemovalRequestDraft> => {
   try {
     const model = 'gemini-2.5-flash';

@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import SecureUpload from './components/SecureUpload';
 import MatchReview from './components/MatchReview';
 import UrlScanner from './components/UrlScanner';
+import ArchitectureViewer from './components/ArchitectureViewer';
 
 const SidebarLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = ({ to, icon, label }) => {
   const location = useLocation();
@@ -39,6 +40,10 @@ const Layout: React.FC = () => {
           <SidebarLink to="/vault" icon={<Icons.Lock />} label="Secure Vault" />
           <SidebarLink to="/report" icon={<Icons.Link />} label="Scan URL" />
           <SidebarLink to="/matches" icon={<Icons.Search />} label="Review Matches" />
+          <div className="pt-4 mt-4 border-t border-slate-800">
+             <span className="px-4 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Engineering</span>
+             <SidebarLink to="/architecture" icon={<Icons.Activity />} label="System Specs" />
+          </div>
         </nav>
 
         <div className="p-4 border-t border-slate-800">
@@ -104,6 +109,7 @@ const Layout: React.FC = () => {
               <MatchReview />
             </div>
           } />
+          <Route path="/architecture" element={<ArchitectureViewer />} />
         </Routes>
       </main>
 
@@ -112,6 +118,7 @@ const Layout: React.FC = () => {
         <Link to="/" className="p-2 text-slate-400 hover:text-white"><Icons.Activity /></Link>
         <Link to="/vault" className="p-2 text-slate-400 hover:text-white"><Icons.Lock /></Link>
         <Link to="/matches" className="p-2 text-slate-400 hover:text-white"><Icons.Search /></Link>
+        <Link to="/architecture" className="p-2 text-slate-400 hover:text-white"><Icons.Activity /></Link>
       </nav>
     </div>
   );
