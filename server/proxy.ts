@@ -449,12 +449,67 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Start server
+// Advanced Scan: Use Puppeteer to screenshot page (bypass bot detection/CORS)
+import puppeteer from 'puppeteer';
+
+app.get('/advanced-scan', async (req: Request, res: Response) => {
+  const url = req.query.url as string;
+  if (!url) return res.status(400).json({ error: 'url required' });
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    
+    // Set stealthy user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1280, height: 720 });
+
+    try {
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+      
+      // Try to click "I am 18" or "Enter" buttons if they exist
+      const entrySelectors = ['#enter', '.enter-button', '[name="submit"]', 'button.age-verification'];
+      for (const sel of entrySelectors) {
+          if (await page.$(sel)) {
+              await page.click(sel).catch(() => {});
+              await new Promise(r => setTimeout(r, 1000));
+          }
+      }
+
+    } catch (e) {
+      // Continue even if timeout, page might be partially loaded
+    }
+
+    // Take screenshot of the view
+    const screenshotBuffer = await page.screenshot({ encoding: 'base64', type: 'jpeg', quality: 80 });
+    
+    // Get page title
+    const title = await page.title();
+    
+    await browser.close();
+
+    return res.json({
+      success: true,
+      title,
+      screenshot: screenshotBuffer, // Base64 string
+      platform: 'Advanced Scanner'
+    });
+
+  } catch (err: any) {
+    console.error('Puppeteer scan failed:', err);
+    return res.status(500).json({ error: 'scan_failed', details: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`\n🛡️  Sentinel Proxy Server running on http://localhost:${PORT}`);
   console.log(`\n   Endpoints:`);
   console.log(`   ├─ GET  /health                         Health check`);
   console.log(`   ├─ GET  /proxy?url=<url>                Generic URL proxy`);
-  console.log(`   ├─ GET  /proxy/image?url=<url>          Image proxy (base64)`);
+  console.log(`   ├─ GET  /advanced-scan?url=<url>        Puppeteer Scanner`);
   console.log(`   ├─ GET  /youtube-thumbnail?url=<url>    YouTube thumbnail`);
   console.log(`   ├─ GET  /facebook-thumbnail?url=<url>   Facebook thumbnail`);
   console.log(`   └─ POST /gemini/analyze                 AI content analysis`);

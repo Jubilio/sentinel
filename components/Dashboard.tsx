@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="w-full" style={{ height: 320, minHeight: 320 }}>
+          <div className="w-full h-[320px] min-h-[320px]">
             {chartData.some(d => d.scans > 0) ? (
                 <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>

@@ -98,6 +98,26 @@ export async function extractThumbnailFromUrl(url: string): Promise<{
       console.warn('Server not available for Facebook, using fallback:', error);
     }
   }
+
+  // SPECIAL HANDLING: High Risk / Adult Platforms (Use Puppeteer Advanced Scan)
+  // This bypasses age gates and bot protection to get a real visual
+  if (platform === 'Pornhub' || platform === 'XVideos' || platform === 'Unknown Platform') {
+    try {
+      const response = await fetch(`/api/advanced-scan?url=${encodeURIComponent(url)}`);
+      if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.screenshot) {
+              return {
+                  thumbnailUrl: `data:image/jpeg;base64,${data.screenshot}`,
+                  title: data.title || 'Detected Content (Verified Visual)',
+                  platform: platform === 'Unknown Platform' ? 'Potentially High Risk' : platform
+              };
+          }
+      }
+    } catch (e) {
+      console.warn('Advanced scan failed, falling back to standard proxy', e);
+    }
+  }
   
   // For other platforms, try local proxy server (run: npm run server)
   // Falls back to third-party proxy if local server is not running
@@ -135,8 +155,8 @@ export async function extractThumbnailFromUrl(url: string): Promise<{
 // Load from CDN to avoid Vite/esbuild bundling issues with embedded model files
 async function analyzeWithNSFWJS(imageUrl: string): Promise<SafetyAnalysis> {
   try {
-    // Load model from jsDelivr CDN (more reliable for CORS)
-    const model = await nsfwjs.load('https://cdn.jsdelivr.net/npm/nsfwjs@4.2.1/models/mobilenet_v2/');
+    // Load model from local public directory (solves CORS issues)
+    const model = await nsfwjs.load('/models/nsfw/model.json');
     
     // Create image element with CORS handling
     const img = document.createElement('img');
@@ -203,23 +223,31 @@ export const analyzeContentSafety = async (imageUrl: string): Promise<SafetyAnal
       body: JSON.stringify({ imageUrl })
     });
     
-    if (serverResponse.ok) {
-      const data = await serverResponse.json();
-      if (data.success) {
-        return {
-          nudityScore: data.analysis.nudityScore,
-          riskScore: data.analysis.riskScore,
-          confidence: data.analysis.confidence,
-          reasoning: data.analysis.reasoning,
-          method: 'gemini'
-        };
+      if (serverResponse.ok) {
+        const data = await serverResponse.json();
+        if (data.success) {
+          return {
+            nudityScore: data.analysis.nudityScore,
+            riskScore: data.analysis.riskScore,
+            confidence: data.analysis.confidence,
+            reasoning: data.analysis.reasoning,
+            method: 'gemini'
+          };
+        }
       }
+      
+      const errorData = await serverResponse.json().catch(() => ({}));
+      console.warn(`Server Gemini failed (${serverResponse.status}):`, errorData.error || errorData.message || 'Unknown error');
+      
+      // If quota exceeded (429), fall back immediately to client-side NSFWJS
+      if (serverResponse.status === 429) {
+          console.log('Gemini Quota Exceeded (429). Switching to NSFWJS fallback.');
+          throw new Error('quota_exceeded');
+      }
+
+    } catch (error) {
+      console.warn('Server not available or returned error, using client-side analysis:', error);
     }
-    
-    console.warn('Server Gemini failed, trying client fallbacks');
-  } catch (error) {
-    console.warn('Server not available, using client-side analysis:', error);
-  }
   
   // Fallback 1: Try direct Gemini call (if API key configured in frontend .env)
   if (process.env.API_KEY) {

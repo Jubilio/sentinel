@@ -198,6 +198,7 @@ const MatchReview: React.FC = () => {
                     <span className="text-xs text-brand-400">AI-Drafted (Gemini)</span>
                   </div>
                   <textarea 
+                    aria-label="Generated legal notice"
                     className="w-full h-64 bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-brand-500 resize-none"
                     readOnly
                     value={draft.legalText}
