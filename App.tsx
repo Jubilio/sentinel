@@ -6,6 +6,10 @@ import SecureUpload from './components/SecureUpload';
 import MatchReview from './components/MatchReview';
 import UrlScanner from './components/UrlScanner';
 import ArchitectureViewer from './components/ArchitectureViewer';
+import HashMonitor from './components/HashMonitor';
+import ResourceCenter from './components/ResourceCenter';
+import ReverseSearch from './components/ReverseSearch';
+import ContinuousMonitor from './components/ContinuousMonitor';
 
 const SidebarLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = ({ to, icon, label }) => {
   const location = useLocation();
@@ -40,6 +44,10 @@ const Layout: React.FC = () => {
           <SidebarLink to="/vault" icon={<Icons.Lock />} label="Secure Vault" />
           <SidebarLink to="/report" icon={<Icons.Link />} label="Scan URL" />
           <SidebarLink to="/matches" icon={<Icons.Search />} label="Review Matches" />
+          <SidebarLink to="/monitor" icon={<Icons.EyeOff />} label="Hash Monitor" />
+          <SidebarLink to="/reverse-search" icon={<Icons.Globe />} label="Reverse Search" />
+          <SidebarLink to="/continuous" icon={<Icons.Activity />} label="Auto Monitor" />
+          <SidebarLink to="/resources" icon={<Icons.Alert />} label="Get Help" />
           <div className="pt-4 mt-4 border-t border-slate-800">
              <span className="px-4 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Engineering</span>
              <SidebarLink to="/architecture" icon={<Icons.Activity />} label="System Specs" />
@@ -110,6 +118,26 @@ const Layout: React.FC = () => {
             </div>
           } />
           <Route path="/architecture" element={<ArchitectureViewer />} />
+          <Route path="/monitor" element={
+            <div className="animate-fade-in h-full">
+              <HashMonitor />
+            </div>
+          } />
+          <Route path="/resources" element={
+            <div className="animate-fade-in h-full">
+              <ResourceCenter />
+            </div>
+          } />
+          <Route path="/reverse-search" element={
+            <div className="animate-fade-in h-full">
+              <ReverseSearch />
+            </div>
+          } />
+          <Route path="/continuous" element={
+            <div className="animate-fade-in h-full">
+              <ContinuousMonitor />
+            </div>
+          } />
         </Routes>
       </main>
 
@@ -118,7 +146,7 @@ const Layout: React.FC = () => {
         <Link to="/" className="p-2 text-slate-400 hover:text-white"><Icons.Activity /></Link>
         <Link to="/vault" className="p-2 text-slate-400 hover:text-white"><Icons.Lock /></Link>
         <Link to="/matches" className="p-2 text-slate-400 hover:text-white"><Icons.Search /></Link>
-        <Link to="/architecture" className="p-2 text-slate-400 hover:text-white"><Icons.Activity /></Link>
+        <Link to="/resources" className="p-2 text-slate-400 hover:text-white"><Icons.Alert /></Link>
       </nav>
     </div>
   );

@@ -1,0 +1,109 @@
+{
+  "platforms": [
+    {
+      "id": "pornhub",
+      "name": "Pornhub",
+      "email": "contentremoval@pornhub.com",
+      "formUrl": "https://www.pornhub.com/content-removal",
+      "instructions": "Use the Content Removal form. Select 'Non-consensual' as the reason. Photo ID may be required.",
+      "responseTime": "24-72 hours"
+    },
+    {
+      "id": "xvideos",
+      "name": "XVideos",
+      "email": null,
+      "formUrl": "https://info.xvideos.com/contact/",
+      "instructions": "Use the contact form selecting 'Report Abuse'. Include all URLs and proof of identity.",
+      "responseTime": "48-96 hours"
+    },
+    {
+      "id": "xnxx",
+      "name": "XNXX",
+      "email": null,
+      "formUrl": "https://info.xnxx.com/contact",
+      "instructions": "Same owner as XVideos. Use contact form with 'Abuse Report' subject.",
+      "responseTime": "48-96 hours"
+    },
+    {
+      "id": "onlyfans",
+      "name": "OnlyFans",
+      "email": "support@onlyfans.com",
+      "formUrl": "https://onlyfans.com/dmca",
+      "instructions": "Submit DMCA form. Requires government ID verification for NCII claims.",
+      "responseTime": "24-48 hours"
+    },
+    {
+      "id": "twitter",
+      "name": "Twitter/X",
+      "email": null,
+      "formUrl": "https://help.twitter.com/forms/private_information",
+      "instructions": "Use 'Private Information' reporting form. Select 'intimate media' category.",
+      "responseTime": "24-72 hours"
+    },
+    {
+      "id": "reddit",
+      "name": "Reddit",
+      "email": "contact@reddit.com",
+      "formUrl": "https://www.reddit.com/report",
+      "instructions": "Report > 'Non-consensual intimate media'. Reddit has strict NCII policies.",
+      "responseTime": "24-48 hours"
+    },
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "email": null,
+      "formUrl": "https://help.instagram.com/contact/504521742987441",
+      "instructions": "Use 'Report Something' > 'Nudity or Sexual Activity' > 'Sharing private images'.",
+      "responseTime": "24-72 hours"
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "email": null,
+      "formUrl": "https://www.facebook.com/help/contact/567360146613371",
+      "instructions": "Use the dedicated intimate image removal form. Consider StopNCII.org hash program.",
+      "responseTime": "24-72 hours"
+    },
+    {
+      "id": "tiktok",
+      "name": "TikTok",
+      "email": null,
+      "formUrl": "https://www.tiktok.com/legal/report/privacy",
+      "instructions": "Privacy report form > 'Image of me shared without consent'.",
+      "responseTime": "24-48 hours"
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "email": null,
+      "formUrl": "https://support.google.com/youtube/answer/142443",
+      "instructions": "Privacy complaint process. Select 'Privacy' > 'I appear in content I did not consent to'.",
+      "responseTime": "48-72 hours"
+    },
+    {
+      "id": "default",
+      "name": "Other Platform",
+      "email": null,
+      "formUrl": null,
+      "instructions": "Search for the platform's 'Report Abuse', 'DMCA', or 'Trust & Safety' contact page. Most platforms are required to respond to valid DMCA notices within 24-72 hours.",
+      "responseTime": "Varies"
+    }
+  ],
+  "resources": [
+    {
+      "name": "StopNCII.org",
+      "url": "https://stopncii.org/",
+      "description": "Create a hash of your images without uploading them. Partners include Meta, TikTok, Reddit, and others."
+    },
+    {
+      "name": "Cyber Civil Rights Initiative",
+      "url": "https://cybercivilrights.org/",
+      "description": "Free support, resources, and referrals for NCII victims."
+    },
+    {
+      "name": "NCMEC Take It Down",
+      "url": "https://takeitdown.ncmec.org/",
+      "description": "For victims under 18. Free service to remove explicit content."
+    }
+  ]
+}

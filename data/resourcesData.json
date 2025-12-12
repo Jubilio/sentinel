@@ -1,0 +1,183 @@
+{
+  "organizations": [
+    {
+      "name": "StopNCII.org",
+      "url": "https://stopncii.org/",
+      "description": "Create a hash of your images/videos to prevent sharing across platforms. Partners: Meta, TikTok, Reddit, Bumble.",
+      "region": "global",
+      "services": ["hash_protection", "prevention"],
+      "languages": ["en", "pt", "es", "fr"]
+    },
+    {
+      "name": "Cyber Civil Rights Initiative (CCRI)",
+      "url": "https://cybercivilrights.org/",
+      "description": "Free crisis helpline, referrals, and advocacy for image abuse victims.",
+      "region": "global",
+      "services": ["crisis_support", "legal_referral", "advocacy"],
+      "phone": "1-844-878-CCRI",
+      "languages": ["en"]
+    },
+    {
+      "name": "NCMEC Take It Down",
+      "url": "https://takeitdown.ncmec.org/",
+      "description": "For victims under 18. Free, anonymous service to remove explicit images.",
+      "region": "global",
+      "services": ["minor_protection", "removal"],
+      "languages": ["en", "es"]
+    },
+    {
+      "name": "SaferNet Brasil",
+      "url": "https://new.safernet.org.br/",
+      "description": "Denúncias de crimes cibernéticos no Brasil. Canal de ajuda para vítimas de vazamento de imagens íntimas.",
+      "region": "brazil",
+      "services": ["reporting", "counseling", "legal_support"],
+      "phone": "100",
+      "languages": ["pt"]
+    },
+    {
+      "name": "Revenge Porn Helpline (UK)",
+      "url": "https://revengepornhelpline.org.uk/",
+      "description": "Free, confidential support for UK victims of intimate image abuse.",
+      "region": "uk",
+      "services": ["crisis_support", "removal_assistance"],
+      "languages": ["en"]
+    },
+    {
+      "name": "eSafety Commissioner (Australia)",
+      "url": "https://www.esafety.gov.au/key-issues/image-based-abuse",
+      "description": "Australian government body with legal powers to remove intimate images.",
+      "region": "australia",
+      "services": ["legal_enforcement", "removal", "counseling"],
+      "languages": ["en"]
+    },
+    {
+      "name": "INHOPE",
+      "url": "https://www.inhope.org/",
+      "description": "Network of 50+ hotlines worldwide for reporting illegal content.",
+      "region": "global",
+      "services": ["reporting", "law_enforcement"],
+      "languages": ["en", "multi"]
+    },
+    {
+      "name": "Chayn",
+      "url": "https://www.chayn.co/",
+      "description": "Resources for survivors of gender-based violence, including tech abuse.",
+      "region": "global",
+      "services": ["guides", "support", "safety_planning"],
+      "languages": ["en", "ar", "ur", "hi"]
+    }
+  ],
+  "legalGuides": [
+    {
+      "country": "Brazil",
+      "code": "BR",
+      "flag": "🇧🇷",
+      "laws": [
+        {
+          "name": "Lei 13.718/2018 (Importunação Sexual)",
+          "description": "Criminaliza a divulgação de cena de sexo sem consentimento. Pena: 1-5 anos de reclusão.",
+          "link": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/L13718.htm"
+        },
+        {
+          "name": "Marco Civil da Internet (Lei 12.965/2014)",
+          "description": "Obriga provedores a removerem conteúdo íntimo após notificação da vítima.",
+          "link": "http://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l12965.htm"
+        }
+      ],
+      "reportingAuthority": "Delegacia de Crimes Cibernéticos ou qualquer delegacia"
+    },
+    {
+      "country": "United States",
+      "code": "US",
+      "flag": "🇺🇸",
+      "laws": [
+        {
+          "name": "SHIELD Act (Federal)",
+          "description": "Makes nonconsensual distribution of intimate images a federal crime.",
+          "link": "https://www.congress.gov/bill/117th-congress/house-bill/2102"
+        },
+        {
+          "name": "State Laws",
+          "description": "48 states have specific revenge porn laws with varying penalties.",
+          "link": "https://cybercivilrights.org/revenge-porn-laws/"
+        }
+      ],
+      "reportingAuthority": "FBI IC3, local police, or state attorney general"
+    },
+    {
+      "country": "United Kingdom",
+      "code": "GB",
+      "flag": "🇬🇧",
+      "laws": [
+        {
+          "name": "Criminal Justice and Courts Act 2015",
+          "description": "Section 33 criminalizes sharing private sexual images without consent. Up to 2 years imprisonment.",
+          "link": "https://www.legislation.gov.uk/ukpga/2015/2/section/33"
+        },
+        {
+          "name": "Online Safety Act 2023",
+          "description": "Platforms must proactively remove intimate image abuse content.",
+          "link": "https://www.gov.uk/government/publications/online-safety-act-explainer"
+        }
+      ],
+      "reportingAuthority": "Police via 101, or Report to Revenge Porn Helpline"
+    },
+    {
+      "country": "Portugal",
+      "code": "PT",
+      "flag": "🇵🇹",
+      "laws": [
+        {
+          "name": "Código Penal Art. 192º (Devassa da vida privada)",
+          "description": "Protege contra divulgação de imagens íntimas. Pena até 3 anos.",
+          "link": "https://dre.pt/web/guest/legislacao-consolidada"
+        }
+      ],
+      "reportingAuthority": "Polícia Judiciária - Unidade de Cibercrime"
+    },
+    {
+      "country": "European Union",
+      "code": "EU",
+      "flag": "🇪🇺",
+      "laws": [
+        {
+          "name": "GDPR Art. 17 (Right to Erasure)",
+          "description": "Data subjects can request deletion of personal data including images.",
+          "link": "https://gdpr-info.eu/art-17-gdpr/"
+        },
+        {
+          "name": "Digital Services Act (DSA)",
+          "description": "Platforms must remove illegal content promptly after notification.",
+          "link": "https://digital-strategy.ec.europa.eu/en/policies/digital-services-act-package"
+        }
+      ],
+      "reportingAuthority": "National Data Protection Authority"
+    }
+  ],
+  "chatServices": [
+    {
+      "name": "CVV (Centro de Valorização da Vida)",
+      "description": "Apoio emocional 24h para pessoas em crise no Brasil.",
+      "url": "https://www.cvv.org.br/",
+      "phone": "188",
+      "region": "brazil",
+      "available": "24/7"
+    },
+    {
+      "name": "Crisis Text Line",
+      "description": "Text HOME to 741741 for free 24/7 crisis support in the US.",
+      "url": "https://www.crisistextline.org/",
+      "phone": "Text HOME to 741741",
+      "region": "us",
+      "available": "24/7"
+    },
+    {
+      "name": "Samaritans",
+      "description": "Free 24/7 emotional support for anyone in distress (UK/Ireland).",
+      "url": "https://www.samaritans.org/",
+      "phone": "116 123",
+      "region": "uk",
+      "available": "24/7"
+    }
+  ]
+}
