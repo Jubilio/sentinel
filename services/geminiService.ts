@@ -97,9 +97,37 @@ export const generateLegalTakedown = async (evidence: EvidencePackage): Promise<
 };
 
 export const generatePortugueseTakedown = async (analysis: UrlAnalysisResult, isVictim: boolean): Promise<string> => {
+  const dateStr = new Date().toISOString();
+  const victimStatus = isVictim ? 'A vítima é o próprio reportante' : 'O reportante é representante legal verificado';
+  const vaultId = analysis.matchResult.vaultAssetId || 'pending';
+  
+  // Hand-crafted template for fallback/offline mode
+  const offlineTemplate = `Assunto: Pedido urgente de remoção de conteúdo íntimo publicado sem consentimento — [Ref: ${vaultId}]
+
+À equipa de moderação e departamento legal do ${analysis.platform || 'Provedor de Serviço'},
+
+Venho por este meio reportar formalmente a existência de conteúdo publicado sem consentimento (Non-Consensual Intimate Imagery - NCII) que viola os vossos Termos de Serviço e a legislação de proteção de dados e direitos de imagem vigente.
+
+DADOS DA OCORRÊNCIA:
+Link para o conteúdo ofensivo: ${analysis.url}
+Data da deteção: ${dateStr}
+Hash de identificação única (SHA-256): ${analysis.matchResult.videoHashMatch ? 'VERIFIED-MATCH' : 'UNKNOWN'}
+
+DESCRIÇÃO:
+O conteúdo no link acima exibe imagens/vídeos de cariz íntimo ou sexual, produzidos ou distribuídos em contexto privado, cuja divulgação pública NUNCA foi autorizada. A manutenção deste conteúdo online causa danos irreparáveis à vítima.
+
+SOLICITAÇÃO DE AÇÃO IMEDIATA:
+1. Remoção permanente e irreversível do URL indicado e de qualquer cópia (mirror) na vossa plataforma;
+2. Bloqueio preventivo de novos uploads deste material (hash matching);
+3. Preservação de todos os registos de acesso e upload (IPs, timestamps, user IDs) para instrução de processo criminal, se necessário.
+
+Declaro sob compromisso de honra que as informações aqui prestadas são verdadeiras e que sou ${isVictim ? 'a vítima retratada' : 'o representante legal devidamente autorizado'}.
+
+Atenciosamente,
+[Assinatura Digital Sentinel: ${vaultId}]`;
+
   try {
     const model = 'gemini-2.5-flash';
-    const dateStr = new Date().toISOString();
     const prompt = `
       You are a legal assistant specializing in digital rights in Portugal/Brazil.
       Fill the following template with the provided details. 
@@ -107,8 +135,8 @@ export const generatePortugueseTakedown = async (analysis: UrlAnalysisResult, is
       Context:
       - URL: ${analysis.url}
       - Date: ${dateStr}
-      - Hash: SHA256-${analysis.matchResult.vaultAssetId || 'UNKNOWN'}
-      - Victim Status: ${isVictim ? 'The reporter is the victim' : 'The reporter is a verified legal representative'}
+      - Hash: SHA256-${vaultId}
+      - Victim Status: ${victimStatus}
       
       Template to fill:
       "Assunto: Pedido urgente de remoção de conteúdo íntimo publicado sem consentimento — [ID do caso / hash]
@@ -132,7 +160,7 @@ export const generatePortugueseTakedown = async (analysis: UrlAnalysisResult, is
 
       Atenciosamente,
       [Vítima / Representante Legal]
-      [Sentinel Secure ID: ${analysis.matchResult.vaultAssetId || 'pending'}]"
+      [Sentinel Secure ID: ${vaultId}]"
 
       Output ONLY the filled template text.
     `;
@@ -142,9 +170,10 @@ export const generatePortugueseTakedown = async (analysis: UrlAnalysisResult, is
       contents: prompt,
     });
 
-    return response.text || "Erro ao gerar texto legal.";
+    return response.text || offlineTemplate;
   } catch (error) {
-    return "Erro de conexão com o serviço de IA.";
+    console.warn("Falling back to offline template due to AI error:", error);
+    return offlineTemplate;
   }
 };
 

@@ -107,7 +107,7 @@ const ArchitectureViewer: React.FC = () => {
                 <div className="p-6 bg-slate-850 rounded-lg border border-slate-700">
                     <h4 className="text-white font-semibold mb-2">Vector Search</h4>
                     <p className="text-slate-400 text-xs leading-relaxed">
-                        Milvus DB stores 512-dimension vectors. Matching is done via HNSW (Hierarchical Navigable Small World) index for <100ms latency on 10M+ records.
+                        Milvus DB stores 512-dimension vectors. Matching is done via HNSW (Hierarchical Navigable Small World) index for &lt;100ms latency on 10M+ records.
                     </p>
                 </div>
                 <div className="p-6 bg-slate-850 rounded-lg border border-slate-700">
@@ -139,7 +139,7 @@ const ArchitectureViewer: React.FC = () => {
                     </div>
                     <div>
                         <h4 className="text-white font-medium mb-1">Face Recognition</h4>
-                        <p>ArcFace/FaceNet models generating 512d embeddings. Threshold set to >0.6 cosine similarity.</p>
+                        <p>ArcFace/FaceNet models generating 512d embeddings. Threshold set to &gt;0.6 cosine similarity.</p>
                     </div>
                 </div>
             </TechSpecSection>

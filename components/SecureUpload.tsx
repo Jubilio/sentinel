@@ -4,6 +4,24 @@ import { secureAssetProcessingPipeline } from '../services/localProcessing';
 import { analyzeImageContent } from '../services/geminiService';
 import { ProcessingStep } from '../types';
 
+const ProgressBar: React.FC<{ progress: number; status: string }> = ({ progress, status }) => {
+  const barRef =React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (barRef.current) {
+      barRef.current.style.width = `${progress}%`;
+    }
+  }, [progress]);
+
+  return (
+    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div 
+        ref={barRef}
+        className={`h-full transition-all duration-300 ${status === 'completed' ? 'bg-green-500' : 'bg-brand-500'}`} 
+      />
+    </div>
+  );
+};
 const SecureUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [hasConsented, setHasConsented] = useState(false);
@@ -186,36 +204,86 @@ const SecureUpload: React.FC = () => {
                     <span>{step.label}</span>
                     <span>{step.status === 'completed' ? 'Done' : step.progress > 0 ? `${Math.round(step.progress)}%` : 'Pending'}</span>
                   </div>
-                  <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-300 ${step.status === 'completed' ? 'bg-green-500' : 'bg-brand-500'}`} 
-                      style={{ width: `${step.progress}%` }}
-                    />
-                  </div>
+                  <ProgressBar progress={step.progress} status={step.status} />
                 </div>
               ))}
             </div>
           )}
         </div>
       ) : (
-        <div className="text-center py-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-900/30 text-green-500 mb-4">
-            <Icons.CheckCircle />
+        <div className="animate-fade-in">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden mb-6 relative shadow-2xl">
+            {/* Decorative top bar */}
+            <div className="h-1 bg-gradient-to-r from-brand-500 to-green-500 w-full"></div>
+            
+            <div className="p-8">
+              <div className="flex justify-between items-start mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-900/40 rounded-lg text-green-400 border border-green-900">
+                    <Icons.CheckCircle />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white tracking-tight">Chain of Custody Established</h3>
+                    <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mt-1">Cryptographic Evidence Receipt</p>
+                  </div>
+                </div>
+                <div className="hidden sm:block text-right">
+                  <div className="text-2xl font-mono text-slate-500 font-bold opacity-20">SENTINEL-SECURE</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                <div className="p-4 bg-slate-950 rounded-lg border border-slate-800">
+                    <span className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Timestamp (UTC)</span>
+                    <div className="text-sm text-slate-200 font-mono mt-1">{new Date().toUTCString()}</div>
+                </div>
+                <div className="p-4 bg-slate-950 rounded-lg border border-slate-800">
+                    <span className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Encryption Protocol</span>
+                    <div className="text-sm text-slate-200 font-mono mt-1">AES-256-GCM + SHA-256 (WASM)</div>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <span className="text-[10px] uppercase text-slate-500 font-bold tracking-wider block mb-2">Unique Asset Fingerprint (pHash)</span>
+                <div className="p-4 bg-slate-950 rounded-lg border border-slate-800 font-mono text-xs text-brand-400 break-all border-l-4 border-l-brand-500 flex justify-between items-center group relative">
+                    {completedHash}
+                    <button 
+                      className="ml-4 p-2 hover:bg-slate-800 rounded text-slate-500 hover:text-white transition-colors"
+                      onClick={() => {
+                        if (completedHash) navigator.clipboard.writeText(completedHash);
+                      }}
+                      title="Copy Hash"
+                    >
+                      <Icons.FileText />
+                    </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <button 
+                  className="w-full flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-lg font-medium transition-colors border border-slate-600 flex items-center justify-center space-x-2"
+                  onClick={() => alert("Receipt downloaded (Simulated)")}
+                >
+                    <Icons.Download />
+                    <span>Download Receipt</span>
+                </button>
+                <button 
+                    onClick={() => { setFile(null); setCompletedHash(null); resetSteps(); setHasConsented(false); setAiAnalysis(null); }}
+                    className="w-full flex-1 bg-transparent hover:bg-slate-800 text-brand-400 py-3 rounded-lg font-medium transition-colors border border-brand-900 hover:border-brand-700"
+                >
+                    Process New Asset
+                </button>
+              </div>
+              
+            </div>
+            
+            {/* Footer */}
+            <div className="bg-slate-950 p-4 border-t border-slate-800 text-center">
+              <p className="text-[10px] text-slate-600">
+                Sentinel Zero-Knowledge Proof • Generated Locally via WASM
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-white mb-2">Asset Secured & Indexed</h3>
-          <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
-            Your anonymous fingerprint has been added to the monitoring queue.
-            The original file has been securely wiped from browser memory.
-          </p>
-          <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 font-mono text-xs text-slate-400 break-all mb-6">
-            {completedHash}
-          </div>
-          <button 
-            onClick={() => { setFile(null); setCompletedHash(null); resetSteps(); setHasConsented(false); setAiAnalysis(null); }}
-            className="text-brand-400 hover:text-brand-300 text-sm font-medium"
-          >
-            Register another asset
-          </button>
         </div>
       )}
     </div>
