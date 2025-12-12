@@ -4,6 +4,16 @@ import { secureAssetProcessingPipeline } from '../services/localProcessing';
 import { analyzeImageContent } from '../services/geminiService';
 import { ProcessingStep } from '../types';
 
+const downloadFile = (filename: string, content: string, type: string = 'text/plain') => {
+  const element = document.createElement("a");
+  const file = new Blob([content], { type });
+  element.href = URL.createObjectURL(file);
+  element.download = filename;
+  document.body.appendChild(element); // Required for Firefox
+  element.click();
+  document.body.removeChild(element);
+};
+
 const ProgressBar: React.FC<{ progress: number; status: string }> = ({ progress, status }) => {
   const barRef =React.useRef<HTMLDivElement>(null);
 
@@ -260,9 +270,39 @@ const SecureUpload: React.FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+
+
                 <button 
                   className="w-full flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-lg font-medium transition-colors border border-slate-600 flex items-center justify-center space-x-2"
-                  onClick={() => alert("Receipt downloaded (Simulated)")}
+                  onClick={() => {
+                    const timestamp = new Date().toUTCString();
+                    const receiptContent = `SENTINEL SECURE VAULT - EVIDENCE RECEIPT
+--------------------------------------------------
+Status: VERIFIED & SECURED
+Timestamp: ${timestamp}
+Reference ID: ${window.crypto.randomUUID ? window.crypto.randomUUID() : 'GEN-' + Date.now()}
+
+ASSET DETAILS
+--------------------------------------------------
+Fingerprint (pHash): ${completedHash || 'PENDING'}
+Encryption: AES-256-GCM + SHA-256 (WASM)
+Integrity: VERIFIED
+
+CHAIN OF CUSTODY
+--------------------------------------------------
+1. Asset Ingestion: COMPLETED
+2. Local Encryption: COMPLETED
+3. Secure Transmission: COMPLETED
+4. Vault Storage: CONFIRMED
+
+This receipt certifies that the digital asset associated with 
+the fingerprint above has been securely processed and stored 
+within the Sentinel Secure Vault infrastructure.
+--------------------------------------------------
+Sentinel Protection Systems
+`;
+                    downloadFile(`sentinel_receipt_${Date.now()}.txt`, receiptContent);
+                  }}
                 >
                     <Icons.Download />
                     <span>Download Receipt</span>

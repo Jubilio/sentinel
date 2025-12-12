@@ -21,6 +21,18 @@ const StatCard: React.FC<{ label: string; value: string | number; subtext?: stri
 );
 
 const Dashboard: React.FC = () => {
+  const handleDownloadReport = () => {
+    const headers = "Day,Scans";
+    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + data.map(e => `${e.name},${e.scans}`).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `scan_report_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -34,9 +46,19 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 bg-slate-850 rounded-xl border border-slate-700 p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-white">Scan Activity Volume</h3>
-            <span className="text-xs bg-brand-900/50 text-brand-400 px-2 py-1 rounded border border-brand-800">
-              Live Monitor
-            </span>
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={handleDownloadReport}
+                className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded border border-slate-600 flex items-center space-x-1 transition-colors"
+                title="Download Report"
+              >
+                <Icons.Download className="w-3 h-3" />
+                <span>CSV</span>
+              </button>
+              <span className="text-xs bg-brand-900/50 text-brand-400 px-2 py-1 rounded border border-brand-800">
+                Live Monitor
+              </span>
+            </div>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>

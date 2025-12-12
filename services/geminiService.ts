@@ -135,8 +135,8 @@ export async function extractThumbnailFromUrl(url: string): Promise<{
 // Load from CDN to avoid Vite/esbuild bundling issues with embedded model files
 async function analyzeWithNSFWJS(imageUrl: string): Promise<SafetyAnalysis> {
   try {
-    // Load model from unpkg CDN (nsfwjs v4.x uses models/mobilenet_v2 path)
-    const model = await nsfwjs.load('https://unpkg.com/nsfwjs@4.2.1/models/mobilenet_v2/');
+    // Load model from jsDelivr CDN (more reliable for CORS)
+    const model = await nsfwjs.load('https://cdn.jsdelivr.net/npm/nsfwjs@4.2.1/models/mobilenet_v2/');
     
     // Create image element with CORS handling
     const img = document.createElement('img');
