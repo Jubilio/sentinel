@@ -8,6 +8,18 @@ const MatchReview: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<EvidencePackage | null>(null);
   const [draft, setDraft] = useState<RemovalRequestDraft | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [matches, setMatches] = useState<EvidencePackage[]>([]);
+
+  React.useEffect(() => {
+    const savedMatches = localStorage.getItem('sentinel_matches');
+    if (savedMatches) {
+      try {
+        setMatches(JSON.parse(savedMatches));
+      } catch (e) {
+        console.error('Failed to parse matches', e);
+      }
+    }
+  }, []);
 
   const handleGenerateTakedown = async (match: EvidencePackage) => {
     setIsGenerating(true);
@@ -38,7 +50,14 @@ const MatchReview: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {MOCK_MATCHES.map((match: EvidencePackage) => (
+          {matches.length === 0 && (
+            <div className="text-center p-8 border border-slate-700 rounded-lg text-slate-500">
+              <Icons.Shield className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p>No matches detected yet.</p>
+              <p className="text-xs mt-1">Run a scan in the dashboard to populate this list.</p>
+            </div>
+          )}
+          {matches.map((match: EvidencePackage) => (
             <div 
               key={match.id}
               onClick={() => { setSelectedMatch(match); setDraft(null); }}
