@@ -82,7 +82,7 @@ export async function extractThumbnailFromUrl(url: string): Promise<{
   // SPECIAL HANDLING: Facebook - use server endpoint for og:image extraction
   if (platform === 'Facebook') {
     try {
-      const response = await fetch(`http://localhost:4000/facebook-thumbnail?url=${encodeURIComponent(url)}`);
+      const response = await fetch(`/api/facebook-thumbnail?url=${encodeURIComponent(url)}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -105,7 +105,7 @@ export async function extractThumbnailFromUrl(url: string): Promise<{
     // Try local proxy first
     let response: Response;
     try {
-      response = await fetch(`http://localhost:4000/proxy?url=${encodeURIComponent(url)}`);
+      response = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
     } catch {
       // Fallback to third-party proxy if local server not running
       console.warn('Local proxy not available, using fallback');
@@ -197,7 +197,7 @@ async function analyzeWithNSFWJS(imageUrl: string): Promise<SafetyAnalysis> {
 export const analyzeContentSafety = async (imageUrl: string): Promise<SafetyAnalysis> => {
   // Try server-side Gemini first (recommended - keeps API key secure)
   try {
-    const serverResponse = await fetch('http://localhost:4000/gemini/analyze', {
+    const serverResponse = await fetch('/api/gemini/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageUrl })
