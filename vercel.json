@@ -13,10 +13,7 @@
     }
   ],
   "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 15
-    },
-    "api/advanced-scan.ts": {
+    "api/**/*": {
       "maxDuration": 60,
       "memory": 1024
     }
