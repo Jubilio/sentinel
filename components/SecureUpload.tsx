@@ -105,6 +105,20 @@ const SecureUpload: React.FC = () => {
       updateStep(3, 'completed', 100);
       setCompletedHash(`SHA256-${result.originalHash.substring(0, 16)}...`);
       
+      // Save to Vault persistence for Dashboard stats
+      try {
+        const vault = JSON.parse(localStorage.getItem('sentinel_vault') || '[]');
+        vault.push({ 
+            id: `VAULT-${Date.now()}`,
+            hash: `SHA256-${result.originalHash.substring(0, 16)}...`,
+            filename: file.name,
+            addedAt: new Date().toISOString()
+        });
+        localStorage.setItem('sentinel_vault', JSON.stringify(vault));
+      } catch (e) {
+        console.error('Vault save error', e);
+      }
+      
     } catch (err) {
       console.error(err);
     } finally {

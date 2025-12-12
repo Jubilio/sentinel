@@ -1,16 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from '../constants';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-
-const data = [
-  { name: 'Mon', scans: 400 },
-  { name: 'Tue', scans: 300 },
-  { name: 'Wed', scans: 550 },
-  { name: 'Thu', scans: 480 },
-  { name: 'Fri', scans: 600 },
-  { name: 'Sat', scans: 350 },
-  { name: 'Sun', scans: 420 },
-];
 
 const StatCard: React.FC<{ label: string; value: string | number; subtext?: string; urgent?: boolean }> = ({ label, value, subtext, urgent }) => (
   <div className={`p-6 rounded-xl border ${urgent ? 'bg-red-900/10 border-red-800' : 'bg-slate-850 border-slate-700'} shadow-lg`}>
@@ -21,9 +11,71 @@ const StatCard: React.FC<{ label: string; value: string | number; subtext?: stri
 );
 
 const Dashboard: React.FC = () => {
+  const [stats, setStats] = useState({
+    protectedAssets: 0,
+    totalScans: 0,
+    matchesFound: 0,
+    highRiskCount: 0
+  });
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Load real data from LocalStorage
+    try {
+      const scanLogs = JSON.parse(localStorage.getItem('sentinel_scan_log') || '[]');
+      const matches = JSON.parse(localStorage.getItem('sentinel_matches') || '[]');
+      const vault = JSON.parse(localStorage.getItem('sentinel_vault') || '[]');
+
+      // Calculate Stat Cards
+      const highRisk = matches.filter((m: any) => m.riskScore > 70 || m.nudityScore > 70).length;
+      
+      setStats({
+        protectedAssets: vault.length,
+        totalScans: scanLogs.length,
+        matchesFound: matches.length,
+        highRiskCount: highRisk
+      });
+
+      // Calculate Chart Data (Activity by Day of Week)
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const activityMap = new Map();
+      days.forEach(d => activityMap.set(d, 0));
+
+      scanLogs.forEach((log: any) => {
+        const date = new Date(log.timestamp);
+        // Only count logs from last 7 days to simulate a weekly view
+        if (Date.now() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
+            const dayName = days[date.getDay()];
+            activityMap.set(dayName, (activityMap.get(dayName) || 0) + 1);
+        }
+      });
+
+      const newChartData = days.map(day => ({
+        name: day,
+        scans: activityMap.get(day)
+      }));
+      setChartData(newChartData);
+
+      // Recent Logs
+      // Merge scan logs and vault additions for audit trail
+      const auditTrail = [
+          ...scanLogs.map((l: any) => ({ ...l, type: 'SCAN', msg: 'Scan completed' })),
+          ...vault.map((v: any) => ({ ...v, type: 'VAULT', msg: 'New asset protected', timestamp: v.addedAt })),
+          ...matches.map((m: any) => ({ ...m, type: 'MATCH', msg: `High risk match detected (${m.platform})`, timestamp: m.detectedAt }))
+      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+       .slice(0, 5);
+      
+      setRecentLogs(auditTrail);
+
+    } catch (e) {
+      console.error('Failed to load dashboard data', e);
+    }
+  }, []);
+
   const handleDownloadReport = () => {
     const headers = "Day,Scans";
-    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + data.map(e => `${e.name},${e.scans}`).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + chartData.map(e => `${e.name},${e.scans}`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -36,10 +88,10 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Protected Assets" value="3" subtext="Last updated 2m ago" />
-        <StatCard label="Takedown Time" value="4h 12m" subtext="Avg. Time to Removal" />
-        <StatCard label="Matches Found" value="12" subtext="3 High Risk Pending" urgent />
-        <StatCard label="Success Rate" value="98.2%" subtext="0.5% False Positive Rate" />
+        <StatCard label="Protected Assets" value={stats.protectedAssets} subtext="Stored in Secure Vault" />
+        <StatCard label="Total Scans" value={stats.totalScans} subtext="All time activity" />
+        <StatCard label="Matches Found" value={stats.matchesFound} subtext={`${stats.highRiskCount} High Risk Logs`} urgent={stats.matchesFound > 0} />
+        <StatCard label="High Risk Assets" value={stats.highRiskCount} subtext="Requires Immediate Action" urgent={stats.highRiskCount > 0} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -60,23 +112,31 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
-              <BarChart data={data}>
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#e2e8f0' }}
-                  itemStyle={{ color: '#38bdf8' }}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-                <Bar dataKey="scans" radius={[4, 4, 0, 0]}>
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill="#0ea5e9" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="w-full" style={{ height: 320, minHeight: 320 }}>
+            {chartData.some(d => d.scans > 0) ? (
+                <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#e2e8f0' }}
+                    itemStyle={{ color: '#38bdf8' }}
+                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                    />
+                    <Bar dataKey="scans" radius={[4, 4, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill="#0ea5e9" />
+                    ))}
+                    </Bar>
+                </BarChart>
+                </ResponsiveContainer>
+            ) : (
+                <div className="flex items-center justify-center h-full text-slate-500 flex-col">
+                    <Icons.Activity className="w-8 h-8 mb-2 opacity-50"/>
+                    <span className="text-sm">No recent activity data available.</span>
+                    <span className="text-xs mt-1">Run a scan to initialize stats.</span>
+                </div>
+            )}
           </div>
         </div>
 
@@ -107,11 +167,17 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div className="mt-6 pt-6 border-t border-slate-700">
-            <h4 className="text-sm font-medium text-slate-400 mb-2">Audit Log</h4>
-            <div className="text-xs text-slate-500 font-mono space-y-1">
-              <p>10:42:01 - Scan batch #9923 completed</p>
-              <p>10:15:22 - New asset registered (SHA-256)</p>
-              <p>09:30:00 - Daily compliance report generated</p>
+            <h4 className="text-sm font-medium text-slate-400 mb-2">Audit Log / Recent Activity</h4>
+            <div className="text-xs text-slate-500 font-mono space-y-2">
+              {recentLogs.length > 0 ? (
+                  recentLogs.map((log, i) => (
+                    <p key={i} className="truncate" title={log.msg}>
+                        {new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {log.msg}
+                    </p>
+                  ))
+              ) : (
+                  <p>No recent activity logs.</p>
+              )}
             </div>
           </div>
         </div>
